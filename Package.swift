@@ -66,10 +66,10 @@ let package = Package(
     ]
 )
 
-package.traits.insert(
-    .default(
-        enabledTraits: ["URLRouting"]
-    )
-)
+//package.traits.insert(
+//    .default(
+//        enabledTraits: ["URLRouting"]
+//    )
+//)
 
 extension String { var tests: Self { self + " Tests" } }

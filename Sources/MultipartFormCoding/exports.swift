@@ -6,3 +6,8 @@
 //
 
 @_exported import RFC_2045
+
+#if URLRouting
+@_exported import URLRouting
+#endif
+
