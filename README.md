@@ -88,9 +88,23 @@ let xmlType = Multipart.FileUpload.FileType(
 
 ### URLRouting Integration
 
+Enable URLRouting support using Swift Package Manager traits:
+
 ```swift
-import MultipartFormCodingURLRouting
-import URLRouting
+// In your Package.swift
+dependencies: [
+    .package(
+        url: "https://github.com/coenttb/swift-multipart-form-coding",
+        from: "0.1.0",
+        traits: ["URLRouting"]  // Enable URLRouting trait
+    )
+]
+```
+
+Then use with URLRouting:
+
+```swift
+import MultipartFormCoding  // URLRouting is conditionally exported when trait is enabled
 
 let avatarUpload = try Multipart.FileUpload(
     fieldName: "avatar",
@@ -110,7 +124,7 @@ let uploadRoute = Route {
 For encoding Codable types to multipart/form-data (e.g., for API integrations like Mailgun):
 
 ```swift
-import MultipartFormCodingURLRouting
+import MultipartFormCoding  // URLRouting trait must be enabled
 
 struct UpdateRequest: Codable {
     let name: String
@@ -144,10 +158,19 @@ let contentType = conversion.contentType  // "multipart/form-data; boundary=..."
 - **Content Type Validation**: Ensures uploaded content matches expectations
 - **Cryptographically Safe Boundaries**: Uses RFC 2046 boundary generation
 
-## Modules
+## URLRouting Trait
 
-- **MultipartFormCoding**: Core file upload and multipart encoding
-- **MultipartFormCodingURLRouting**: Integration with PointFree's [swift-url-routing](https://github.com/pointfreeco/swift-url-routing)
+The `URLRouting` trait provides integration with PointFree's [swift-url-routing](https://github.com/pointfreeco/swift-url-routing). When enabled, it:
+- Makes `Multipart.FileUpload` conform to `URLRouting.Conversion`
+- Makes `Multipart.Conversion<T>` conform to `URLRouting.Conversion`
+- Provides `.multipart(_:)` convenience method on `Conversion`
+- Provides `Field.contentType(_:)` for custom Content-Type headers
+- Re-exports URLRouting for convenient access
+
+To run tests with URLRouting support:
+```bash
+swift test --traits URLRouting
+```
 
 ## Dependencies
 
