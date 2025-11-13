@@ -65,7 +65,7 @@ struct FileUploadValidationErrorTests {
 
     @Test("Throws emptyFieldName when field name is empty")
     func testEmptyFieldName() {
-        #expect(throws: Multipart.FileUpload.MultipartError.emptyFieldName) {
+        #expect(throws: Multipart.FileUpload.Error.emptyFieldName) {
             _ = try Multipart.FileUpload(
                 fieldName: "",
                 filename: "test.jpg",
@@ -76,7 +76,7 @@ struct FileUploadValidationErrorTests {
 
     @Test("Throws emptyFilename when filename is empty")
     func testEmptyFilename() {
-        #expect(throws: Multipart.FileUpload.MultipartError.emptyFilename) {
+        #expect(throws: Multipart.FileUpload.Error.emptyFilename) {
             _ = try Multipart.FileUpload(
                 fieldName: "file",
                 filename: "",
@@ -94,7 +94,7 @@ struct FileUploadValidationErrorTests {
                 fileType: .pdf
             )
             Issue.record("Expected invalidFilename error")
-        } catch let error as Multipart.FileUpload.MultipartError {
+        } catch let error as Multipart.FileUpload.Error {
             if case .invalidFilename(let filename) = error {
                 #expect(filename == "path/to/test.jpg")
             } else {
@@ -114,7 +114,7 @@ struct FileUploadValidationErrorTests {
                 fileType: .pdf
             )
             Issue.record("Expected invalidFilename error")
-        } catch let error as Multipart.FileUpload.MultipartError {
+        } catch let error as Multipart.FileUpload.Error {
             if case .invalidFilename(let filename) = error {
                 #expect(filename == "path\\test.jpg")
             } else {
@@ -135,7 +135,7 @@ struct FileUploadValidationErrorTests {
                 maxSize: 0
             )
             Issue.record("Expected invalidMaxSize error")
-        } catch let error as Multipart.FileUpload.MultipartError {
+        } catch let error as Multipart.FileUpload.Error {
             if case .invalidMaxSize(let size) = error {
                 #expect(size == 0)
             } else {
@@ -156,7 +156,7 @@ struct FileUploadValidationErrorTests {
                 maxSize: -100
             )
             Issue.record("Expected invalidMaxSize error")
-        } catch let error as Multipart.FileUpload.MultipartError {
+        } catch let error as Multipart.FileUpload.Error {
             if case .invalidMaxSize(let size) = error {
                 #expect(size == -100)
             } else {
@@ -179,7 +179,7 @@ struct FileUploadValidationErrorTests {
                 maxSize: excessiveSize
             )
             Issue.record("Expected maxSizeExceedsLimit error")
-        } catch let error as Multipart.FileUpload.MultipartError {
+        } catch let error as Multipart.FileUpload.Error {
             if case .maxSizeExceedsLimit(let size) = error {
                 #expect(size == excessiveSize)
             } else {

@@ -32,7 +32,7 @@ struct ImageTypeJPEGTests {
 
         let invalidData = Data([0x00, 0x00, 0x00])
 
-        #expect(throws: Multipart.FileUpload.MultipartError.self) {
+        #expect(throws: Multipart.FileUpload.Error.self) {
             try upload.validate(invalidData)
         }
     }
@@ -68,7 +68,7 @@ struct ImageTypePNGTests {
 
         let invalidData = Data(repeating: 0x00, count: 8)
 
-        #expect(throws: Multipart.FileUpload.MultipartError.self) {
+        #expect(throws: Multipart.FileUpload.Error.self) {
             try upload.validate(invalidData)
         }
     }
@@ -115,7 +115,7 @@ struct ImageTypeGIFTests {
 
         let invalidData = Data("NOTGIF".utf8)
 
-        #expect(throws: Multipart.FileUpload.MultipartError.self) {
+        #expect(throws: Multipart.FileUpload.Error.self) {
             try upload.validate(invalidData)
         }
     }
@@ -155,7 +155,7 @@ struct ImageTypeWebPTests {
         invalidData.append(Data([0x00, 0x00, 0x00, 0x00]))
         invalidData.append(Data("WEBP".utf8))
 
-        #expect(throws: Multipart.FileUpload.MultipartError.self) {
+        #expect(throws: Multipart.FileUpload.Error.self) {
             try upload.validate(invalidData)
         }
     }
@@ -172,7 +172,7 @@ struct ImageTypeWebPTests {
         invalidData.append(Data([0x00, 0x00, 0x00, 0x00]))
         invalidData.append(Data("XXXX".utf8))
 
-        #expect(throws: Multipart.FileUpload.MultipartError.self) {
+        #expect(throws: Multipart.FileUpload.Error.self) {
             try upload.validate(invalidData)
         }
     }
@@ -219,7 +219,7 @@ struct ImageTypeTIFFTests {
 
         let invalidData = Data([0x00, 0x00, 0x00, 0x00])
 
-        #expect(throws: Multipart.FileUpload.MultipartError.self) {
+        #expect(throws: Multipart.FileUpload.Error.self) {
             try upload.validate(invalidData)
         }
     }
@@ -255,7 +255,7 @@ struct ImageTypeBMPTests {
 
         let invalidData = Data([0x00, 0x00])
 
-        #expect(throws: Multipart.FileUpload.MultipartError.self) {
+        #expect(throws: Multipart.FileUpload.Error.self) {
             try upload.validate(invalidData)
         }
     }
@@ -295,7 +295,7 @@ struct ImageTypeHEICTests {
         invalidData.append(Data("XXXX".utf8))
         invalidData.append(Data("heic".utf8))
 
-        #expect(throws: Multipart.FileUpload.MultipartError.self) {
+        #expect(throws: Multipart.FileUpload.Error.self) {
             try upload.validate(invalidData)
         }
     }
@@ -312,7 +312,7 @@ struct ImageTypeHEICTests {
         invalidData.append(Data("ftyp".utf8))
         invalidData.append(Data("XXXX".utf8))
 
-        #expect(throws: Multipart.FileUpload.MultipartError.self) {
+        #expect(throws: Multipart.FileUpload.Error.self) {
             try upload.validate(invalidData)
         }
     }
@@ -327,7 +327,7 @@ struct ImageTypeHEICTests {
 
         let invalidData = Data(repeating: 0x00, count: 10)  // Less than 12 bytes
 
-        #expect(throws: Multipart.FileUpload.MultipartError.self) {
+        #expect(throws: Multipart.FileUpload.Error.self) {
             try upload.validate(invalidData)
         }
     }
@@ -367,7 +367,7 @@ struct ImageTypeAVIFTests {
         invalidData.append(Data("XXXX".utf8))
         invalidData.append(Data("avif".utf8))
 
-        #expect(throws: Multipart.FileUpload.MultipartError.self) {
+        #expect(throws: Multipart.FileUpload.Error.self) {
             try upload.validate(invalidData)
         }
     }
@@ -384,7 +384,7 @@ struct ImageTypeAVIFTests {
         invalidData.append(Data("ftyp".utf8))
         invalidData.append(Data("XXXX".utf8))
 
-        #expect(throws: Multipart.FileUpload.MultipartError.self) {
+        #expect(throws: Multipart.FileUpload.Error.self) {
             try upload.validate(invalidData)
         }
     }
@@ -399,7 +399,7 @@ struct ImageTypeAVIFTests {
 
         let invalidData = Data(repeating: 0x00, count: 10)  // Less than 12 bytes
 
-        #expect(throws: Multipart.FileUpload.MultipartError.self) {
+        #expect(throws: Multipart.FileUpload.Error.self) {
             try upload.validate(invalidData)
         }
     }

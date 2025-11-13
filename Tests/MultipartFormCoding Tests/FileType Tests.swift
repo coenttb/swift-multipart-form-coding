@@ -30,7 +30,7 @@ struct FileTypeDocumentTests {
 
         let invalidData = Data("Not a PDF".utf8)
 
-        #expect(throws: Multipart.FileUpload.MultipartError.self) {
+        #expect(throws: Multipart.FileUpload.Error.self) {
             try upload.validate(invalidData)
         }
     }
@@ -57,7 +57,7 @@ struct FileTypeDocumentTests {
 
         let invalidData = Data([0xFF, 0xFE, 0xFF, 0xFE])
 
-        #expect(throws: Multipart.FileUpload.MultipartError.self) {
+        #expect(throws: Multipart.FileUpload.Error.self) {
             try upload.validate(invalidData)
         }
     }
@@ -274,7 +274,7 @@ struct FileTypeCustomTests {
             fileExtension: "cst"
         ) { data in
             guard !data.isEmpty else {
-                throw Multipart.FileUpload.MultipartError.emptyData
+                throw Multipart.FileUpload.Error.emptyData
             }
         }
 
@@ -312,7 +312,7 @@ struct FileTypeCustomTests {
             fileExtension: "str"
         ) { data in
             if data.count < 10 {
-                throw Multipart.FileUpload.MultipartError.contentMismatch(
+                throw Multipart.FileUpload.Error.contentMismatch(
                     expected: "at least 10 bytes",
                     detected: "\(data.count) bytes"
                 )
@@ -327,7 +327,7 @@ struct FileTypeCustomTests {
 
         let smallData = Data([0x01, 0x02])
 
-        #expect(throws: Multipart.FileUpload.MultipartError.self) {
+        #expect(throws: Multipart.FileUpload.Error.self) {
             try upload.validate(smallData)
         }
     }
@@ -362,7 +362,7 @@ struct FileTypeImageFactoryTests {
 
         let invalidData = Data(repeating: 0x00, count: 8)
 
-        #expect(throws: Multipart.FileUpload.MultipartError.self) {
+        #expect(throws: Multipart.FileUpload.Error.self) {
             try upload.validate(invalidData)
         }
     }

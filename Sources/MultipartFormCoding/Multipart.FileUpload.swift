@@ -100,23 +100,23 @@ extension Multipart {
             maxSize: Int = Multipart.FileUpload.maxFileSize
         ) throws {
             guard !fieldName.isEmpty else {
-                throw MultipartError.emptyFieldName
+                throw Error.emptyFieldName
             }
 
             guard !filename.isEmpty else {
-                throw MultipartError.emptyFilename
+                throw Error.emptyFilename
             }
 
             guard !filename.contains("/") && !filename.contains("\\") else {
-                throw MultipartError.invalidFilename(filename)
+                throw Error.invalidFilename(filename)
             }
 
             guard maxSize > 0 else {
-                throw MultipartError.invalidMaxSize(maxSize)
+                throw Error.invalidMaxSize(maxSize)
             }
 
             guard maxSize <= 1024 * 1024 * 1024 else {
-                throw MultipartError.maxSizeExceedsLimit(maxSize)
+                throw Error.maxSizeExceedsLimit(maxSize)
             }
 
             self.fieldName = fieldName
@@ -129,11 +129,11 @@ extension Multipart {
 
         public func validate(_ data: Foundation.Data) throws {
             guard !data.isEmpty else {
-                throw MultipartError.emptyData
+                throw Error.emptyData
             }
 
             guard data.count <= maxSize else {
-                throw MultipartError.fileTooLarge(size: data.count, maxSize: maxSize)
+                throw Error.fileTooLarge(size: data.count, maxSize: maxSize)
             }
 
             try fileType.validate(data)
@@ -185,7 +185,7 @@ extension Multipart.FileUpload {
     /// ) { data in
     ///     // Custom validation logic
     ///     guard data.starts(with: "<?xml".data(using: .utf8)!) else {
-    ///         throw Multipart.FileUpload.MultipartError.contentMismatch(
+    ///         throw Multipart.FileUpload.Error.contentMismatch(
     ///             expected: "application/xml",
     ///             detected: nil
     ///         )
@@ -280,7 +280,7 @@ extension Multipart.FileUpload.FileType {
 extension Multipart.FileUpload {
     /// Errors that can occur during multipart file upload processing.
     ///
-    /// `MultipartError` provides detailed error information for various failure
+    /// `Error` provides detailed error information for various failure
     /// scenarios that can occur during file upload validation and processing.
     /// All errors implement `LocalizedError` to provide user-friendly descriptions.
     ///
@@ -303,7 +303,7 @@ extension Multipart.FileUpload {
     /// ```swift
     /// do {
     ///     let validatedData = try fileUpload.apply(uploadData)
-    /// } catch let error as Multipart.FileUpload.MultipartError {
+    /// } catch let error as Multipart.FileUpload.Error {
     ///     switch error {
     ///     case .fileTooLarge(let size, let maxSize):
     ///         print("File \(size) bytes exceeds limit of \(maxSize) bytes")
@@ -315,7 +315,7 @@ extension Multipart.FileUpload {
     ///     }
     /// }
     /// ```
-    public enum MultipartError: Equatable, Sendable, LocalizedError {
+    public enum Error: Equatable, Sendable, LocalizedError {
         /// File size exceeds the configured maximum.
         ///
         /// - Parameters:
@@ -364,7 +364,7 @@ extension Multipart.FileUpload {
     }
 }
 
-extension Multipart.FileUpload.MultipartError {
+extension Multipart.FileUpload.Error {
     /// Provides localized error descriptions for user-facing error messages.
     ///
     /// Each error case returns a descriptive message that can be displayed

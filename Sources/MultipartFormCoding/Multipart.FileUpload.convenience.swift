@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  swift-web
+//  Multipart.FileUpload.convenience.swift
+//  swift-multipart-form-coding
 //
 //  Created by Coen ten Thije Boonkkamp on 29/12/2024.
 //

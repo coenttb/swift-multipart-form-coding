@@ -1,3 +1,10 @@
+//
+//  URLRouting.swift
+//  swift-multipart-form-coding
+//
+//  Created by Coen ten Thije Boonkkamp on 13/01/2025.
+//
+
 #if URLRouting
 import Foundation
 import URLRouting
@@ -501,7 +508,7 @@ extension Multipart.FileUpload.Conversion: URLRouting.Conversion {
     ///
     /// - Parameter input: The raw file data to validate
     /// - Returns: The validated file data (unchanged)
-    /// - Throws: ``MultipartError`` if validation fails
+    /// - Throws: ``Error`` if validation fails
     ///
     /// ## Validation Process
     ///
@@ -526,7 +533,7 @@ extension Multipart.FileUpload.Conversion: URLRouting.Conversion {
     ///
     /// - Parameter data: The file data to wrap in multipart format
     /// - Returns: Complete multipart form data including boundaries and headers
-    /// - Throws: ``MultipartError`` if validation or encoding fails
+    /// - Throws: ``Error`` if validation or encoding fails
     ///
     /// ## Generated Format
     ///
@@ -563,7 +570,7 @@ extension Multipart.FileUpload.Conversion: URLRouting.Conversion {
 
         // Step 5: Convert to Data
         guard let result = rendered.data(using: String.Encoding.utf8) else {
-            throw MultipartError.encodingError
+            throw Error.encodingError
         }
 
         return result

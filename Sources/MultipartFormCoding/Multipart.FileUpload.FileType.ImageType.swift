@@ -24,7 +24,7 @@ extension Multipart.FileUpload.FileType.ImageType {
         ) { (data: Foundation.Data) in
             let jpegMagicNumbers: [UInt8] = [0xFF, 0xD8, 0xFF]
             guard data.prefix(3).elementsEqual(jpegMagicNumbers) else {
-                throw Multipart.FileUpload.MultipartError.contentMismatch(
+                throw Multipart.FileUpload.Error.contentMismatch(
                     expected: "image/jpeg",
                     detected: nil
                 )
@@ -54,7 +54,7 @@ extension Multipart.FileUpload.FileType.ImageType {
         ) { (data: Foundation.Data) in
             let pngMagicNumbers: [UInt8] = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]
             guard data.prefix(8).elementsEqual(pngMagicNumbers) else {
-                throw Multipart.FileUpload.MultipartError.contentMismatch(
+                throw Multipart.FileUpload.Error.contentMismatch(
                     expected: "image/png",
                     detected: nil
                 )
@@ -82,7 +82,7 @@ extension Multipart.FileUpload.FileType.ImageType {
             let gif89a = Data("GIF89a".utf8)
             guard data.prefix(6).elementsEqual(gif87a) || data.prefix(6).elementsEqual(gif89a)
             else {
-                throw Multipart.FileUpload.MultipartError.contentMismatch(
+                throw Multipart.FileUpload.Error.contentMismatch(
                     expected: "image/gif",
                     detected: nil
                 )
@@ -115,7 +115,7 @@ extension Multipart.FileUpload.FileType.ImageType {
                 data.prefix(4).elementsEqual(riffMagic)
                     && data.dropFirst(8).prefix(4).elementsEqual(webpMagic)
             else {
-                throw Multipart.FileUpload.MultipartError.contentMismatch(
+                throw Multipart.FileUpload.Error.contentMismatch(
                     expected: "image/webp",
                     detected: nil
                 )
@@ -146,7 +146,7 @@ extension Multipart.FileUpload.FileType.ImageType {
                 data.prefix(4).elementsEqual(intelMagic)
                     || data.prefix(4).elementsEqual(motorolaMagic)
             else {
-                throw Multipart.FileUpload.MultipartError.contentMismatch(
+                throw Multipart.FileUpload.Error.contentMismatch(
                     expected: "image/tiff",
                     detected: nil
                 )
@@ -173,7 +173,7 @@ extension Multipart.FileUpload.FileType.ImageType {
         ) { (data: Foundation.Data) in
             let bmpMagic: [UInt8] = [0x42, 0x4D]  // "BM"
             guard data.prefix(2).elementsEqual(bmpMagic) else {
-                throw Multipart.FileUpload.MultipartError.contentMismatch(
+                throw Multipart.FileUpload.Error.contentMismatch(
                     expected: "image/bmp",
                     detected: nil
                 )
@@ -209,7 +209,7 @@ extension Multipart.FileUpload.FileType.ImageType {
                 let brand = String(data: data.subdata(in: 8..<12), encoding: .ascii),
                 brand == "heic"
             else {
-                throw Multipart.FileUpload.MultipartError.contentMismatch(
+                throw Multipart.FileUpload.Error.contentMismatch(
                     expected: "image/heic",
                     detected: nil
                 )
@@ -245,7 +245,7 @@ extension Multipart.FileUpload.FileType.ImageType {
                 let brand = String(data: data.subdata(in: 8..<12), encoding: .ascii),
                 brand == "avif"
             else {
-                throw Multipart.FileUpload.MultipartError.contentMismatch(
+                throw Multipart.FileUpload.Error.contentMismatch(
                     expected: "image/avif",
                     detected: nil
                 )

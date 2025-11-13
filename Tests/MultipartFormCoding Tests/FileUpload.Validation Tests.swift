@@ -38,7 +38,7 @@ struct FileUploadSizeValidationTests {
         do {
             try upload.validate(largeData)
             Issue.record("Expected fileTooLarge error")
-        } catch let error as Multipart.FileUpload.MultipartError {
+        } catch let error as Multipart.FileUpload.Error {
             if case .fileTooLarge(let size, let maxSize) = error {
                 #expect(size > maxSize)
             } else {
@@ -57,7 +57,7 @@ struct FileUploadSizeValidationTests {
 
         let emptyData = Data()
 
-        #expect(throws: Multipart.FileUpload.MultipartError.emptyData) {
+        #expect(throws: Multipart.FileUpload.Error.emptyData) {
             try upload.validate(emptyData)
         }
     }
@@ -68,7 +68,7 @@ struct FileUploadErrorDescriptionTests {
 
     @Test("FileTooLarge error includes sizes")
     func testFileTooLargeDescription() {
-        let error = Multipart.FileUpload.MultipartError.fileTooLarge(
+        let error = Multipart.FileUpload.Error.fileTooLarge(
             size: 1000,
             maxSize: 500
         )
@@ -78,7 +78,7 @@ struct FileUploadErrorDescriptionTests {
 
     @Test("ContentMismatch error includes types")
     func testContentMismatchDescription() {
-        let error = Multipart.FileUpload.MultipartError.contentMismatch(
+        let error = Multipart.FileUpload.Error.contentMismatch(
             expected: "image/jpeg",
             detected: "image/png"
         )
@@ -88,55 +88,55 @@ struct FileUploadErrorDescriptionTests {
 
     @Test("EmptyData error has description")
     func testEmptyDataDescription() {
-        let error = Multipart.FileUpload.MultipartError.emptyData
+        let error = Multipart.FileUpload.Error.emptyData
         #expect(error.errorDescription != nil)
         #expect(error.errorDescription?.isEmpty == false)
     }
 
     @Test("EncodingError has description")
     func testEncodingErrorDescription() {
-        let error = Multipart.FileUpload.MultipartError.encodingError
+        let error = Multipart.FileUpload.Error.encodingError
         #expect(error.errorDescription != nil)
         #expect(error.errorDescription?.isEmpty == false)
     }
 
     @Test("InvalidContentType error includes type")
     func testInvalidContentTypeDescription() {
-        let error = Multipart.FileUpload.MultipartError.invalidContentType("bad/type")
+        let error = Multipart.FileUpload.Error.invalidContentType("bad/type")
         #expect(error.errorDescription?.contains("bad/type") == true)
     }
 
     @Test("MalformedBoundary error has description")
     func testMalformedBoundaryDescription() {
-        let error = Multipart.FileUpload.MultipartError.malformedBoundary
+        let error = Multipart.FileUpload.Error.malformedBoundary
         #expect(error.errorDescription != nil)
         #expect(error.errorDescription?.isEmpty == false)
     }
 
     @Test("EmptyFieldName error has description")
     func testEmptyFieldNameDescription() {
-        let error = Multipart.FileUpload.MultipartError.emptyFieldName
+        let error = Multipart.FileUpload.Error.emptyFieldName
         #expect(error.errorDescription != nil)
         #expect(error.errorDescription?.contains("Field name") == true)
     }
 
     @Test("EmptyFilename error has description")
     func testEmptyFilenameDescription() {
-        let error = Multipart.FileUpload.MultipartError.emptyFilename
+        let error = Multipart.FileUpload.Error.emptyFilename
         #expect(error.errorDescription != nil)
         #expect(error.errorDescription?.contains("Filename") == true)
     }
 
     @Test("InvalidFilename error includes filename")
     func testInvalidFilenameDescription() {
-        let error = Multipart.FileUpload.MultipartError.invalidFilename("path/to/file.jpg")
+        let error = Multipart.FileUpload.Error.invalidFilename("path/to/file.jpg")
         #expect(error.errorDescription?.contains("path/to/file.jpg") == true)
         #expect(error.errorDescription?.contains("path separators") == true)
     }
 
     @Test("InvalidMaxSize error includes size")
     func testInvalidMaxSizeDescription() {
-        let error = Multipart.FileUpload.MultipartError.invalidMaxSize(0)
+        let error = Multipart.FileUpload.Error.invalidMaxSize(0)
         #expect(error.errorDescription?.contains("0") == true)
         #expect(error.errorDescription?.contains("positive") == true)
     }
@@ -144,7 +144,7 @@ struct FileUploadErrorDescriptionTests {
     @Test("MaxSizeExceedsLimit error includes size")
     func testMaxSizeExceedsLimitDescription() {
         let largeSize = 2 * 1024 * 1024 * 1024
-        let error = Multipart.FileUpload.MultipartError.maxSizeExceedsLimit(largeSize)
+        let error = Multipart.FileUpload.Error.maxSizeExceedsLimit(largeSize)
         #expect(error.errorDescription?.contains("1GB") == true)
     }
 }

@@ -17,7 +17,7 @@ extension Multipart.FileUpload.FileType {
         fileExtension: "csv"
     ) { (data: Foundation.Data) in
         guard let _ = String(data: data, encoding: .utf8) else {
-            throw Multipart.FileUpload.MultipartError.contentMismatch(
+            throw Multipart.FileUpload.Error.contentMismatch(
                 expected: "text/csv",
                 detected: nil
             )
@@ -37,7 +37,7 @@ extension Multipart.FileUpload.FileType {
         fileExtension: "pdf"
     ) { (data: Foundation.Data) in
         guard data.prefix(4).elementsEqual("%PDF".data(using: .utf8)!) else {
-            throw Multipart.FileUpload.MultipartError.contentMismatch(
+            throw Multipart.FileUpload.Error.contentMismatch(
                 expected: "application/pdf",
                 detected: nil
             )

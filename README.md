@@ -36,6 +36,14 @@ Then add the product to your target:
 )
 ```
 
+## Supported Platforms
+
+- macOS 14.0+
+- iOS 17.0+
+- tvOS 17.0+
+- watchOS 10.0+
+- Swift 6.1+
+
 ## Quick Start
 
 ### Basic File Upload
@@ -81,7 +89,10 @@ let xmlType = Multipart.FileUpload.FileType(
     fileExtension: "xml"
 ) { data in
     guard data.starts(with: "<?xml".data(using: .utf8)!) else {
-        throw ValidationError()
+        throw Multipart.FileUpload.Error.contentMismatch(
+            expected: "application/xml",
+            detected: nil
+        )
     }
 }
 ```
