@@ -7,6 +7,8 @@ extension String {
     static let multipartFormCodingURLRouting: Self = "URLRouting"
 }
 
+extension String { var tests: Self { self + " Tests" } }
+
 extension Target.Dependency {
     static var multipartFormCoding: Self { .target(name: .multipartFormCoding) }
     static var multipartFormCodingURLRouting: Self { .target(name: .multipartFormCodingURLRouting) }
@@ -36,7 +38,10 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/swift-standards/swift-rfc-2045.git", from: "0.1.0"),
         .package(url: "https://github.com/swift-standards/swift-rfc-2046.git", from: "0.1.3"),
-        .package(url: "https://github.com/swift-standards/swift-rfc-7578.git", from: "0.2.1"),
+        .package(
+            url: "https://github.com/swift-standards/swift-rfc-7578.git",
+            from: "0.2.1"
+        ),
         .package(url: "https://github.com/pointfreeco/swift-url-routing", from: "0.6.0")
     ],
     targets: [
@@ -66,10 +71,17 @@ let package = Package(
     ]
 )
 
+for target in package.targets {
+    target.swiftSettings?.append(
+        contentsOf: [
+            .enableUpcomingFeature("MemberImportVisibility")
+        ]
+    )
+}
+
 //package.traits.insert(
 //    .default(
 //        enabledTraits: ["URLRouting"]
 //    )
 //)
 
-extension String { var tests: Self { self + " Tests" } }
