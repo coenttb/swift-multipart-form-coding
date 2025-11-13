@@ -4,7 +4,7 @@ import PackageDescription
 
 extension String {
     static let multipartFormCoding: Self = "MultipartFormCoding"
-    static let multipartFormCodingURLRouting: Self = "MultipartFormCodingURLRouting"
+    static let multipartFormCodingURLRouting: Self = "URLRouting"
 }
 
 extension Target.Dependency {
@@ -25,8 +25,13 @@ let package = Package(
         .watchOS(.v10)
     ],
     products: [
-        .library(name: .multipartFormCoding, targets: [.multipartFormCoding]),
-        .library(name: .multipartFormCodingURLRouting, targets: [.multipartFormCodingURLRouting])
+        .library(name: .multipartFormCoding, targets: [.multipartFormCoding])
+    ],
+    traits: [
+        .trait(
+            name: "URLRouting",
+            description: "URLRouting integration for MultipartFormCoding"
+        )
     ],
     dependencies: [
         .package(url: "https://github.com/swift-standards/swift-rfc-2045.git", from: "0.1.0"),
@@ -39,7 +44,17 @@ let package = Package(
             name: .multipartFormCoding,
             dependencies: [
                 .rfc2045,
-                .rfc2046
+                .rfc2046,
+                .product(
+                    name: "RFC 7578",
+                    package: "swift-rfc-7578",
+                    condition: .when(traits: ["URLRouting"])
+                ),
+                .product(
+                    name: "URLRouting",
+                    package: "swift-url-routing",
+                    condition: .when(traits: ["URLRouting"])
+                )
             ]
         ),
         .testTarget(
@@ -47,25 +62,14 @@ let package = Package(
             dependencies: [
                 .multipartFormCoding
             ]
-        ),
-        .target(
-            name: .multipartFormCodingURLRouting,
-            dependencies: [
-                .multipartFormCoding,
-                .rfc2045,
-                .rfc2046,
-                .rfc7578,
-                .urlRouting
-            ]
-        ),
-        .testTarget(
-            name: .multipartFormCodingURLRouting.tests,
-            dependencies: [
-                .multipartFormCoding,
-                .multipartFormCodingURLRouting
-            ]
         )
     ]
+)
+
+package.traits.insert(
+    .default(
+        enabledTraits: ["URLRouting"]
+    )
 )
 
 extension String { var tests: Self { self + " Tests" } }

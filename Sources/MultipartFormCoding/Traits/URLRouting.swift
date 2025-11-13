@@ -1,9 +1,11 @@
+#if URLRouting
 import Foundation
+import URLRouting
 import RFC_2045
 import RFC_2046
 import RFC_7578
-import MultipartFormCoding
-import URLRouting
+
+// MARK: - Multipart.Conversion
 
 /// A conversion that handles multipart/form-data encoding for Codable types.
 ///
@@ -410,3 +412,234 @@ private struct MultipartSingleValueEncodingContainer: SingleValueEncodingContain
         }
     }
 }
+
+// MARK: - URLRouting.Conversion Extensions
+
+extension URLRouting.Conversion {
+    /// Creates a multipart form data conversion for the specified Codable type.
+    ///
+    /// This static method provides a convenient way to create ``Multipart.Conversion``
+    /// instances for use in URLRouting route definitions.
+    ///
+    /// - Parameters:
+    ///   - type: The Codable type to convert to/from multipart form data
+    ///   - arrayEncodingStrategy: How to encode array fields (default: accumulate values)
+    /// - Returns: A ``Multipart.Conversion`` instance
+    ///
+    /// ## Example
+    ///
+    /// ```swift
+    /// struct UpdateRequest: Codable {
+    ///     let name: String
+    ///     let subscribed: Bool
+    /// }
+    ///
+    /// // Create conversion with default array strategy
+    /// let conversion = Conversion.multipart(UpdateRequest.self)
+    ///
+    /// // Or with custom array strategy
+    /// let conversion = Conversion.multipart(
+    ///     UpdateRequest.self,
+    ///     arrayEncodingStrategy: .brackets
+    /// )
+    /// ```
+    ///
+    /// ## Usage in Routes
+    ///
+    /// ```swift
+    /// Route {
+    ///     Method.put
+    ///     Path { "members" / \.id }
+    ///     Body(.multipart(UpdateRequest.self))
+    /// }
+    /// ```
+    public static func multipart<Value>(
+        _ type: Value.Type,
+        arrayEncodingStrategy: MultipartArrayEncodingStrategy = .accumulateValues
+    ) -> Self where Self == Multipart.Conversion<Value> {
+        .init(type, arrayEncodingStrategy: arrayEncodingStrategy)
+    }
+
+    /// Maps this conversion through a multipart form data conversion.
+    ///
+    /// This method allows you to chain conversions, applying multipart form data
+    /// conversion after another conversion has been applied.
+    ///
+    /// - Parameters:
+    ///   - type: The Codable type to convert to/from multipart form data
+    ///   - arrayEncodingStrategy: How to encode array fields (default: accumulate values)
+    /// - Returns: A mapped conversion that applies both conversions in sequence
+    ///
+    /// ## Example
+    ///
+    /// ```swift
+    /// // Chain conversions
+    /// let chainedConversion = Conversion<Data, Data>.identity
+    ///     .multipart(UserProfile.self)
+    /// ```
+    public func multipart<Value>(
+        _ type: Value.Type,
+        arrayEncodingStrategy: MultipartArrayEncodingStrategy = .accumulateValues
+    ) -> Conversions.Map<Self, Multipart.Conversion<Value>> {
+        self.map(.multipart(type, arrayEncodingStrategy: arrayEncodingStrategy))
+    }
+}
+
+// MARK: - Multipart.FileUpload.Conversion
+
+extension Multipart.FileUpload {
+    public typealias Conversion = Multipart.FileUpload
+}
+
+extension Multipart.FileUpload.Conversion: URLRouting.Conversion {
+    /// Validates and returns the input file data.
+    ///
+    /// This method performs comprehensive validation on the uploaded file data:
+    /// - Checks that data is not empty
+    /// - Verifies file size is within limits
+    /// - Validates file content matches expected type using magic numbers
+    ///
+    /// - Parameter input: The raw file data to validate
+    /// - Returns: The validated file data (unchanged)
+    /// - Throws: ``MultipartError`` if validation fails
+    ///
+    /// ## Validation Process
+    ///
+    /// 1. **Empty check**: Ensures file contains data
+    /// 2. **Size check**: Verifies file is within size limits
+    /// 3. **Content validation**: Uses magic numbers to verify file type
+    ///
+    /// ```swift
+    /// // Example usage in route handler
+    /// let fileData = try fileUpload.apply(uploadedData)
+    /// // fileData is now validated and safe to process
+    /// ```
+    public func apply(_ input: Foundation.Data) throws -> Foundation.Data {
+        try validate(input)
+        return input
+    }
+
+    /// Converts file data to multipart/form-data format.
+    ///
+    /// This method wraps the file data in proper RFC 7578-compliant multipart/form-data format,
+    /// using the RFC 2046 Multipart and RFC 7578 FormData implementations.
+    ///
+    /// - Parameter data: The file data to wrap in multipart format
+    /// - Returns: Complete multipart form data including boundaries and headers
+    /// - Throws: ``MultipartError`` if validation or encoding fails
+    ///
+    /// ## Generated Format
+    ///
+    /// The output follows RFC 7578 multipart/form-data specification:
+    /// ```
+    /// --Boundary-<random>
+    /// Content-Disposition: form-data; name="fieldName"; filename="file.ext"
+    /// Content-Type: application/octet-stream
+    ///
+    /// <file data>
+    /// --Boundary-<random>--
+    /// ```
+    public func unapply(_ data: Foundation.Data) throws -> Foundation.Data {
+        // Step 1: Validate the file data
+        try validate(data)
+
+        // Step 2: Create RFC 7578 FormData.File
+        let file = try RFC_7578.FormData.File(
+            fieldName: fieldName,
+            filename: filename,
+            contentType: fileType.contentType,
+            content: data
+        )
+
+        // Step 3: Build RFC 2046 multipart message using RFC 7578 formData
+        let multipart = try RFC_2046.Multipart.formData(
+            fields: [:],
+            files: [file],
+            boundary: boundary
+        )
+
+        // Step 4: Render to RFC-compliant format with CRLF line endings
+        let rendered = multipart.render()
+
+        // Step 5: Convert to Data
+        guard let result = rendered.data(using: String.Encoding.utf8) else {
+            throw MultipartError.encodingError
+        }
+
+        return result
+    }
+}
+
+// MARK: - URLRouting.Field Extensions
+
+extension URLRouting.Field {
+    public static func contentType(_ type: () -> Value) -> Self {
+        Field("Content-Type") {
+            type()
+        }
+    }
+}
+
+extension URLRouting.Field<String> {
+    // Convenience properties for common Content-Type values
+    public static var applicationJSON: Self {
+        Field.contentType { "application/json" }
+    }
+
+    public static var json: Self {
+        .applicationJSON
+    }
+
+    public static var applicationFormURLEncoded: Self {
+        Field.contentType { "application/x-www-form-urlencoded" }
+    }
+
+    public static var formURLEncoded: Self {
+        .applicationFormURLEncoded
+    }
+
+    public static var multipartFormData: Self {
+        Field.contentType { "multipart/form-data" }
+    }
+
+    public static var textPlain: Self {
+        Field.contentType { "text/plain" }
+    }
+
+    public static var textHTML: Self {
+        Field.contentType { "text/html" }
+    }
+
+    public static var html: Self {
+        .textHTML
+    }
+
+    public static var applicationXML: Self {
+        Field.contentType { "application/xml" }
+    }
+
+    public static var xml: Self {
+        .applicationXML
+    }
+
+    public static var applicationOctetStream: Self {
+        Field.contentType { "application/octet-stream" }
+    }
+
+    public static var octetStream: Self {
+        .applicationOctetStream
+    }
+}
+
+extension URLRouting.Field<String> {
+    public enum form {
+        public static var multipart: URLRouting.Field<String> {
+            .multipartFormData
+        }
+
+        public static var urlEncoded: URLRouting.Field<String> {
+            applicationFormURLEncoded
+        }
+    }
+}
+#endif
