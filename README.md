@@ -1,5 +1,8 @@
 # swift-multipart-form-coding
 
+[![CI](https://github.com/coenttb/swift-multipart-form-coding/workflows/CI/badge.svg)](https://github.com/coenttb/swift-multipart-form-coding/actions/workflows/ci.yml)
+![Development Status](https://img.shields.io/badge/status-active--development-blue.svg)
+
 A Swift package for handling `multipart/form-data` encoding with file upload support.
 
 ## Overview
