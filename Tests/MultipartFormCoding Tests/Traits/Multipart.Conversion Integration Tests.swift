@@ -78,5 +78,115 @@ struct MultipartConversionIntegrationTests {
         // Should use brackets notation
         #expect(string.contains("name=\"tags[]\""))
     }
+
+    @Test("URL generation with Multipart.Conversion and Headers block")
+    func testURLGenerationWithHeaders() throws {
+        // Minimal reproduction of Routes.API.update bug
+        struct UpdateRequest: Codable, Equatable {
+            let description: String?
+
+            init(description: String? = nil) {
+                self.description = description
+            }
+        }
+
+        enum API: Equatable {
+            case update(id: String, request: UpdateRequest)
+        }
+
+        struct Router: ParserPrinter {
+            var body: some URLRouting.Router<API> {
+                URLRouting.Route(.case(API.update)) {
+                    let multipartFormCoding = Multipart.Conversion(
+                        UpdateRequest.self,
+                        arrayEncodingStrategy: .accumulateValues
+                    )
+                    Headers {
+                        Field.contentType { multipartFormCoding.contentType }
+                    }
+                    Method.put
+                    Path { "v3" }
+                    Path { "routes" }
+                    Path { Parse(.string) }
+                    Body(multipartFormCoding)
+                }
+            }
+        }
+
+        let router = Router()
+        let api: API = .update(id: "test-id", request: .init(description: "test"))
+
+        // This should generate a URL with path "/v3/routes/test-id"
+        let url = router.url(for: api)
+
+        print("DEBUG: Generated URL path: '\(url.path)'")
+        #expect(url.path == "/v3/routes/test-id", "Expected '/v3/routes/test-id', got '\(url.path)'")
+    }
+
+    @Test("URL generation with Multipart.Conversion WITHOUT Headers block")
+    func testURLGenerationWithoutHeaders() throws {
+        // Test if removing Headers fixes URL generation
+        struct UpdateRequest: Codable, Equatable {
+            let description: String?
+
+            init(description: String? = nil) {
+                self.description = description
+            }
+        }
+
+        enum API: Equatable {
+            case update(id: String, request: UpdateRequest)
+        }
+
+        struct Router: ParserPrinter {
+            var body: some URLRouting.Router<API> {
+                URLRouting.Route(.case(API.update)) {
+                    Method.put
+                    Path { "v3" }
+                    Path { "routes" }
+                    Path { Parse(.string) }
+                    Body(Multipart.Conversion(
+                        UpdateRequest.self,
+                        arrayEncodingStrategy: .accumulateValues
+                    ))
+                }
+            }
+        }
+
+        let router = Router()
+        let api: API = .update(id: "test-id", request: .init(description: "test"))
+
+        let url = router.url(for: api)
+
+        print("DEBUG (no headers): Generated URL path: '\(url.path)'")
+        #expect(url.path == "/v3/routes/test-id", "Expected '/v3/routes/test-id', got '\(url.path)'")
+    }
+
+    @Test("Empty request throws emptyRequest error")
+    func testEmptyRequestError() throws {
+        // Test that encoding a request with all nil fields throws the expected error
+        struct EmptyableRequest: Codable, Equatable {
+            let name: String?
+            let email: String?
+
+            init(name: String? = nil, email: String? = nil) {
+                self.name = name
+                self.email = email
+            }
+        }
+
+        let conversion = Multipart.Conversion(EmptyableRequest.self)
+        let emptyRequest = EmptyableRequest()
+
+        // Attempt to encode the empty request should throw
+        #expect(throws: MultipartConversionError.self) {
+            try conversion.unapply(emptyRequest)
+        }
+
+        // Verify that a non-empty request works fine
+        let validRequest = EmptyableRequest(name: "John")
+        let data = try conversion.unapply(validRequest)
+        #expect(!data.isEmpty)
+    }
 }
 #endif

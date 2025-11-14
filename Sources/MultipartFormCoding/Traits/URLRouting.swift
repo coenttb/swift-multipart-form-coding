@@ -85,11 +85,13 @@ extension Multipart {
         /// - Parameters:
         ///   - type: The Codable type to convert to/from
         ///   - arrayEncodingStrategy: How to encode array fields (default: accumulate values)
+        ///   - boundary: Optional custom boundary string (generates one if not provided)
         public init(
             _ type: Value.Type,
-            arrayEncodingStrategy: MultipartArrayEncodingStrategy = .accumulateValues
+            arrayEncodingStrategy: MultipartArrayEncodingStrategy = .accumulateValues,
+            boundary: String? = nil
         ) {
-            self.boundary = RFC_2046.Multipart.generateBoundary()
+            self.boundary = boundary ?? RFC_2046.Multipart.generateBoundary()
             self.arrayEncodingStrategy = arrayEncodingStrategy
         }
 
@@ -109,12 +111,40 @@ extension Multipart.Conversion: URLRouting.Conversion {
     /// - Returns: The decoded Swift value
     /// - Throws: Decoding errors
     ///
-    /// - Note: This is a basic implementation. For robust parsing of actual multipart data,
-    ///   consider using a dedicated multipart parser.
+    /// - Note: Parses multipart data using RFC 2046 parser and converts to Swift value via JSON.
     public func apply(_ input: Data) throws -> Value {
-        // For now, this is a placeholder. Full multipart parsing is complex.
-        // In practice, most APIs only need the `unapply` direction (encoding).
-        throw MultipartConversionError.decodingNotImplemented
+        print("DEBUG apply() called with \(input.count) bytes")
+
+        // Convert Data to String
+        guard let string = String(data: input, encoding: .utf8) else {
+            print("DEBUG: Invalid UTF-8")
+            throw MultipartConversionError.decodingFailed(
+                reason: "Invalid UTF-8 in multipart data"
+            )
+        }
+
+        print("DEBUG: String length = \(string.count)")
+
+        // Parse multipart data using RFC 2046
+        let multipart = try RFC_2046.Multipart.parse(
+            string,
+            boundary: boundary,
+            subtype: RFC_2046.Multipart.Subtype.formData
+        )
+
+        print("DEBUG: Parsed \(multipart.parts.count) parts")
+
+        // Extract form fields to dictionary
+        let fields = multipart.extractFormFields()
+
+        print("DEBUG: Extracted \(fields.count) fields: \(fields)")
+
+        // Convert dictionary to JSON and then decode to Value type
+        let jsonData = try JSONSerialization.data(withJSONObject: fields)
+        let decoder = JSONDecoder()
+        let result = try decoder.decode(Value.self, from: jsonData)
+        print("DEBUG: Decoded successfully")
+        return result
     }
 
     /// Converts a Swift value to multipart form data.
@@ -126,11 +156,20 @@ extension Multipart.Conversion: URLRouting.Conversion {
     /// - Returns: The multipart form data as `Data`
     /// - Throws: Encoding errors
     public func unapply(_ output: Value) throws -> Foundation.Data {
+        print("DEBUG unapply() called with output: \(output)")
         // Step 1: Extract field→value pairs using our custom encoder
         let encoder = MultipartFieldEncoder(arrayStrategy: arrayEncodingStrategy)
         try output.encode(to: encoder)
+        print("DEBUG encoder.fields count: \(encoder.fields.count)")
 
-        // Step 2: Convert each field to an RFC_2046.BodyPart
+        // Step 2: Validate we have at least one field
+        guard !encoder.fields.isEmpty else {
+            throw MultipartConversionError.emptyRequest(
+                reason: "Cannot encode \(Value.self) as multipart/form-data: all fields are nil or empty. At least one field must have a value."
+            )
+        }
+
+        // Step 3: Convert each field to an RFC_2046.BodyPart
         let parts: [RFC_2046.BodyPart] = encoder.fields.map { field in
             // Use RFC_7578 for proper Content-Disposition header formatting
             // This handles escaping of special characters in field names per RFC 2183/RFC 2231
@@ -145,17 +184,17 @@ extension Multipart.Conversion: URLRouting.Conversion {
             )
         }
 
-        // Step 3: Build RFC 2046-compliant multipart message
+        // Step 4: Build RFC 2046-compliant multipart message
         let multipart = try RFC_2046.Multipart(
             subtype: .formData,
             parts: parts,
             boundary: boundary
         )
 
-        // Step 4: Render to RFC-compliant format with CRLF line endings
+        // Step 5: Render to RFC-compliant format with CRLF line endings
         let rendered = multipart.render()
 
-        // Step 5: Convert to Data
+        // Step 6: Convert to Data
         guard let data = rendered.data(using: .utf8) else {
             throw MultipartConversionError.encodingFailed
         }
@@ -167,14 +206,17 @@ extension Multipart.Conversion: URLRouting.Conversion {
 /// Errors that can occur during multipart conversion.
 public enum MultipartConversionError: Error, LocalizedError {
     case encodingFailed
-    case decodingNotImplemented
+    case decodingFailed(reason: String)
+    case emptyRequest(reason: String)
 
     public var errorDescription: String? {
         switch self {
         case .encodingFailed:
             return "Failed to encode value as multipart/form-data"
-        case .decodingNotImplemented:
-            return "Decoding from multipart/form-data is not yet implemented"
+        case .decodingFailed(let reason):
+            return "Failed to decode multipart/form-data: \(reason)"
+        case .emptyRequest(let reason):
+            return reason
         }
     }
 }
@@ -649,4 +691,24 @@ extension URLRouting.Field<String> {
         }
     }
 }
+
+// MARK: - URLRouting.Conversion Extensions
+
+extension URLRouting.Conversion {
+    /// Creates a multipart/form-data conversion for the specified Codable type.
+    ///
+    /// - Parameters:
+    ///   - type: The Codable type to convert to/from multipart form data
+    ///   - arrayEncodingStrategy: Strategy for encoding arrays (default: accumulate values)
+    ///   - boundary: Optional custom boundary string (generates one if not provided)
+    /// - Returns: A ``Multipart.Conversion`` instance
+    public static func multipart<Value>(
+        _ type: Value.Type,
+        arrayEncodingStrategy: MultipartArrayEncodingStrategy = .accumulateValues,
+        boundary: String? = nil
+    ) -> Self where Self == Multipart.Conversion<Value> {
+        .init(type, arrayEncodingStrategy: arrayEncodingStrategy, boundary: boundary)
+    }
+}
+
 #endif
