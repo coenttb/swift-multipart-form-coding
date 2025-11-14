@@ -38,7 +38,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/swift-standards/swift-rfc-2045.git", from: "0.1.0"),
         .package(url: "https://github.com/swift-standards/swift-rfc-2046.git", from: "0.2.0"),
-        .package(url: "https://github.com/swift-standards/swift-rfc-7578.git", from: "0.2.1"),
+        .package(url: "https://github.com/swift-standards/swift-rfc-7578.git", from: "0.2.2"),
         .package(url: "https://github.com/pointfreeco/swift-url-routing", from: "0.6.0")
     ],
     targets: [
