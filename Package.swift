@@ -39,6 +39,13 @@ let package = Package(
                 .htmlFormCoderMultipart
             ]
         ),
+        .testTarget(
+            name: .multipartFormCoding.tests,
+            dependencies: [
+                .multipartFormCoding
+            ],
+            path: "Tests/Multipart Form Coding Tests"
+        ),
     ]
 )
 
