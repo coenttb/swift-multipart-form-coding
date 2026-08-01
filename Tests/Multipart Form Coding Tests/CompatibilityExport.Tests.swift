@@ -7,7 +7,13 @@ import MultipartFormCoding
 import Testing
 
 @Suite
-struct CompatibilityExportTests {
+struct `Compatibility Export Tests` {
+    @Suite struct Unit {}
+    @Suite struct `Edge Case` {}
+    @Suite struct Integration {}
+}
+
+extension `Compatibility Export Tests`.Unit {
     @Test
     func `module re-exports the multipart form coder`() {
         // swift-multipart-form-coding is a compatibility export for the
