@@ -18,10 +18,10 @@ extension Target.Dependency {
 let package = Package(
     name: "swift-multipart-form-coding",
     platforms: [
-        .macOS(.v26),
-        .iOS(.v26),
-        .tvOS(.v26),
-        .watchOS(.v26)
+        .macOS("27"),
+        .iOS("27"),
+        .tvOS("27"),
+        .watchOS("27")
     ],
     products: [
         .library(name: .multipartFormCoding, targets: [.multipartFormCoding])
