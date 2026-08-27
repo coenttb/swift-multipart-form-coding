@@ -1,7 +1,7 @@
 # .github/metadata.yaml
 description: "multipart/form-data encoding with file-upload support for Swift."
 topics:
-  - foundations
+  - compositions
   - form-coding
   - multipart
 homepage: "https://swift-institute.org"

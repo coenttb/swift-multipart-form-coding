@@ -1,6 +1,6 @@
 # swift-multipart-form-coding
 
-[![CI](https://github.com/coenttb/swift-multipart-form-coding/workflows/CI/badge.svg)](https://github.com/coenttb/swift-multipart-form-coding/actions/workflows/ci.yml)
+[![CI](https://github.com/swift-compositions/swift-multipart-form-coding/workflows/CI/badge.svg)](https://github.com/swift-compositions/swift-multipart-form-coding/actions/workflows/ci.yml)
 ![Development Status](https://img.shields.io/badge/status-active--development-blue.svg)
 
 A Swift package for handling `multipart/form-data` encoding with file upload support.
@@ -24,7 +24,7 @@ Add this package to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/coenttb/swift-multipart-form-coding", from: "0.1.0")
+    .package(url: "https://github.com/swift-compositions/swift-multipart-form-coding", from: "0.1.0")
 ]
 ```
 
@@ -108,7 +108,7 @@ Enable URLRouting support using Swift Package Manager traits:
 // In your Package.swift
 dependencies: [
     .package(
-        url: "https://github.com/coenttb/swift-multipart-form-coding",
+        url: "https://github.com/swift-compositions/swift-multipart-form-coding",
         from: "0.1.0"
     )
 ]
@@ -194,7 +194,7 @@ swift test --traits URLRouting
 
 ## Architecture
 
-This package focuses specifically on **file uploads** in multipart/form-data format. For regular form data without files, use [swift-url-form-coding](https://github.com/coenttb/swift-url-form-coding) which provides `application/x-www-form-urlencoded` encoding.
+This package focuses specifically on **file uploads** in multipart/form-data format. For regular form data without files, use [swift-url-form-coding](https://github.com/swift-compositions/swift-url-form-coding) which provides `application/x-www-form-urlencoded` encoding.
 
 The packages are **architecturally independent**:
 - URL Form Coding: Text-based key-value form data
@@ -206,8 +206,8 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 
 ## Related Packages
 
-- [swift-url-form-coding](https://github.com/coenttb/swift-url-form-coding) - URL form encoding/decoding
-- [swift-form-coding](https://github.com/coenttb/swift-form-coding) - Umbrella package that re-exports both
+- [swift-url-form-coding](https://github.com/swift-compositions/swift-url-form-coding) - URL form encoding/decoding
+- [swift-form-coding](https://github.com/swift-compositions/swift-form-coding) - Umbrella package that re-exports both
 
 ## Security
 
