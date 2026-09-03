@@ -2,19 +2,6 @@
 
 import PackageDescription
 
-extension String {
-    static let multipartFormCoding: Self = "MultipartFormCoding"
-}
-
-extension String { var tests: Self { self + " Tests" } }
-
-extension Target.Dependency {
-    static var multipartFormCoding: Self { .target(name: .multipartFormCoding) }
-    static var htmlFormCoderMultipart: Self {
-        .product(name: "HTML Form Coder Multipart", package: "swift-html-form-coder")
-    }
-}
-
 let package = Package(
     name: "swift-multipart-form-coding",
     platforms: [
@@ -24,7 +11,7 @@ let package = Package(
         .watchOS("27")
     ],
     products: [
-        .library(name: .multipartFormCoding, targets: [.multipartFormCoding])
+        .library(name: "MultipartFormCoding", targets: ["MultipartFormCoding"])
     ],
     dependencies: [
         .package(
@@ -34,15 +21,15 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: .multipartFormCoding,
+            name: "MultipartFormCoding",
             dependencies: [
-                .htmlFormCoderMultipart
+                .product(name: "HTML Form Coder Multipart", package: "swift-html-form-coder")
             ]
         ),
         .testTarget(
-            name: .multipartFormCoding.tests,
+            name: "MultipartFormCoding Tests",
             dependencies: [
-                .multipartFormCoding
+                .target(name: "MultipartFormCoding")
             ],
             path: "Tests/Multipart Form Coding Tests"
         ),
