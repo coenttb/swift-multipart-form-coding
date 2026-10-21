@@ -8,7 +8,7 @@ let package = Package(
         .macOS("27"),
         .iOS("27"),
         .tvOS("27"),
-        .watchOS("27")
+        .watchOS("27"),
     ],
     products: [
         .library(name: "MultipartFormCoding", targets: ["MultipartFormCoding"])
@@ -37,7 +37,8 @@ let package = Package(
 )
 
 for target in package.targets {
-    target.swiftSettings = (target.swiftSettings ?? []) + [
-        .enableUpcomingFeature("MemberImportVisibility")
-    ]
+    target.swiftSettings =
+        (target.swiftSettings ?? []) + [
+            .enableUpcomingFeature("MemberImportVisibility")
+        ]
 }
